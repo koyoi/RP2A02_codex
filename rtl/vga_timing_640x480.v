@@ -20,22 +20,20 @@ module vga_timing_640x480 (
     localparam V_BP     = 33;
     localparam V_TOTAL  = V_ACTIVE + V_FP + V_SYNC + V_BP;
 
-    assign frame_start = (x == 10'd0 && y == 10'd0);
+    assign frame_start = (x == 10'd0) && (y == 10'd0);
 
     always @(posedge clk) begin
         if (rst) begin
             x <= 10'd0;
             y <= 10'd0;
+        end else if (x == H_TOTAL - 1) begin
+            x <= 10'd0;
+            if (y == V_TOTAL - 1)
+                y <= 10'd0;
+            else
+                y <= y + 10'd1;
         end else begin
-            if (x == H_TOTAL - 1) begin
-                x <= 10'd0;
-                if (y == V_TOTAL - 1)
-                    y <= 10'd0;
-                else
-                    y <= y + 10'd1;
-            end else begin
-                x <= x + 10'd1;
-            end
+            x <= x + 10'd1;
         end
     end
 
@@ -43,11 +41,11 @@ module vga_timing_640x480 (
         if (rst) begin
             hsync <= 1'b1;
             vsync <= 1'b1;
-            de    <= 1'b0;
+            de <= 1'b0;
         end else begin
             hsync <= ~((x >= H_ACTIVE + H_FP) && (x < H_ACTIVE + H_FP + H_SYNC));
             vsync <= ~((y >= V_ACTIVE + V_FP) && (y < V_ACTIVE + V_FP + V_SYNC));
-            de    <= (x < H_ACTIVE) && (y < V_ACTIVE);
+            de <= (x < H_ACTIVE) && (y < V_ACTIVE);
         end
     end
 endmodule
